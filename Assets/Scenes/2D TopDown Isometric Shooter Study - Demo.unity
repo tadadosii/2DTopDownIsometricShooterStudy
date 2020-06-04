@@ -168,9 +168,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   axis: 0
   target: {fileID: 0}
-  localUpdate: 1
+  localUpdate: 0
   lookAtMousePosition: 1
   inverted: 1
+  debugColor: {r: 0, g: 0, b: 0, a: 0}
+  debug: 1
 --- !u!1 &28457498
 GameObject:
   m_ObjectHideFlags: 0
@@ -716,7 +718,7 @@ GameObject:
   m_Layer: 0
   m_Name: ForeArm_R_TargetToLookAt
   m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 3306451490063965843, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1522,7 +1524,7 @@ GameObject:
   m_Layer: 0
   m_Name: Hand_L_TargetToLookAt <
   m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 3306451490063965843, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1761,9 +1763,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   axis: 0
   target: {fileID: 0}
-  localUpdate: 1
+  localUpdate: 0
   lookAtMousePosition: 1
   inverted: 0
+  debugColor: {r: 0, g: 0, b: 0, a: 0}
+  debug: 0
 --- !u!1 &476491733
 GameObject:
   m_ObjectHideFlags: 0
@@ -1882,7 +1886,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5.02
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2210,6 +2214,8 @@ MonoBehaviour:
   localUpdate: 0
   lookAtMousePosition: 0
   inverted: 0
+  debugColor: {r: 0.13231826, g: 1, b: 0, a: 1}
+  debug: 1
 --- !u!212 &570922779
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3609,6 +3615,8 @@ MonoBehaviour:
   localUpdate: 0
   lookAtMousePosition: 0
   inverted: 0
+  debugColor: {r: 0, g: 1, b: 0.031594753, a: 1}
+  debug: 1
 --- !u!1 &837090009
 GameObject:
   m_ObjectHideFlags: 0
@@ -3673,7 +3681,7 @@ GameObject:
   m_Layer: 0
   m_Name: Hand_R_TargetToLookAt <
   m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 3306451490063965843, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -3763,6 +3771,8 @@ MonoBehaviour:
   localUpdate: 0
   lookAtMousePosition: 1
   inverted: 1
+  debugColor: {r: 0, g: 0, b: 0, a: 0}
+  debug: 1
 --- !u!1 &929338234
 GameObject:
   m_ObjectHideFlags: 0
@@ -3821,10 +3831,12 @@ MonoBehaviour:
   - {fileID: 1472716806}
   - {fileID: 570922778}
   - {fileID: 908173833}
+  - {fileID: 23746720}
   rightDirectionLookAt:
   - {fileID: 832164402}
   - {fileID: 1888908149}
   - {fileID: 995439415}
+  - {fileID: 443285053}
   weapon:
   - {fileID: 1561450197}
   - {fileID: 1810324092}
@@ -4119,6 +4131,8 @@ MonoBehaviour:
   localUpdate: 0
   lookAtMousePosition: 1
   inverted: 0
+  debugColor: {r: 0, g: 0, b: 0, a: 0}
+  debug: 0
 --- !u!1 &1070217178
 GameObject:
   m_ObjectHideFlags: 0
@@ -4839,7 +4853,7 @@ Transform:
   - {fileID: 1444815192}
   m_Father: {fileID: 395864072}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 21.712744}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 48.09378}
 --- !u!1 &1290737693
 GameObject:
   m_ObjectHideFlags: 0
@@ -5121,7 +5135,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1931834139}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -31.34331}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 2.7791202}
 --- !u!1 &1444815190
 GameObject:
   m_ObjectHideFlags: 0
@@ -5203,7 +5217,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1273392986}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -18.451279}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -116.01417}
 --- !u!1 &1472716804
 GameObject:
   m_ObjectHideFlags: 0
@@ -5253,6 +5267,8 @@ MonoBehaviour:
   localUpdate: 0
   lookAtMousePosition: 0
   inverted: 0
+  debugColor: {r: 0.25539327, g: 1, b: 0, a: 1}
+  debug: 1
 --- !u!1 &1473507042
 GameObject:
   m_ObjectHideFlags: 0
@@ -5692,7 +5708,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1539144406
 Transform:
   m_ObjectHideFlags: 0
@@ -6097,7 +6113,7 @@ GameObject:
   m_Layer: 0
   m_Name: ForeArm_L_TargetToLookAt
   m_TagString: Untagged
-  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 3306451490063965843, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -6826,6 +6842,8 @@ MonoBehaviour:
   localUpdate: 0
   lookAtMousePosition: 0
   inverted: 0
+  debugColor: {r: 0.16409624, g: 1, b: 0, a: 1}
+  debug: 1
 --- !u!114 &1888908150
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6967,7 +6985,7 @@ Transform:
   - {fileID: 1437401263}
   m_Father: {fileID: 395864072}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0.10400045, y: 0, z: -20.325874}
+  m_LocalEulerAnglesHint: {x: 1, y: 0, z: -15.407724}
 --- !u!1 &2131352852
 GameObject:
   m_ObjectHideFlags: 0

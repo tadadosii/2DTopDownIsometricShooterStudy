@@ -8,6 +8,9 @@ public class Weapon : MonoBehaviour
     // --------------------------------------
     // - 2D TopDown Isometric Shooter Study -
     // ----------- by Tadadosi --------------
+    // --------------------------------------
+    // ---- https://twitter.com/tadadosi ----
+    // --------------------------------------
 
     #region ---------------------------- PROPERTIES
     public float fireRate;

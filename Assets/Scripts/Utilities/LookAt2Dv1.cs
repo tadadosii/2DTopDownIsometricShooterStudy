@@ -10,6 +10,9 @@ public class LookAt2Dv1 : MonoBehaviour
     // --------------------------------------
     // - 2D TopDown Isometric Shooter Study -
     // ----------- by Tadadosi --------------
+    // --------------------------------------
+    // ---- https://twitter.com/tadadosi ----
+    // --------------------------------------
 
     public enum Axis { x, y }
     public Axis axis = Axis.y;
@@ -17,6 +20,10 @@ public class LookAt2Dv1 : MonoBehaviour
     public bool localUpdate;
     public bool lookAtMousePosition;
     public bool inverted;
+
+    [Header("Debug")]
+    public Color debugColor;
+    public bool debug;
 
     private Vector2 direction;
 
@@ -42,6 +49,7 @@ public class LookAt2Dv1 : MonoBehaviour
                 return;
             }
             direction = (target.position - transform.position).normalized;
+
         }
 
 
@@ -64,5 +72,11 @@ public class LookAt2Dv1 : MonoBehaviour
             default:
                 break;
         }
+
+        if (debug)
+            if (target != null)
+                Debug.DrawLine(transform.position, target.position, debugColor);
+            else
+                Debug.DrawLine(transform.position, MouseInput.mouseWorldPos, debugColor);
     }
 }

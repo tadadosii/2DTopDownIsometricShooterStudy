@@ -5,6 +5,9 @@ public class CameraBehaviour : MonoBehaviour
     // --------------------------------------
     // - 2D TopDown Isometric Shooter Study -
     // ----------- by Tadadosi --------------
+    // --------------------------------------
+    // ---- https://twitter.com/tadadosi ----
+    // --------------------------------------
 
     public float followSpeed;
     public Transform target;

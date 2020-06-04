@@ -11,6 +11,9 @@ public class Shoulder : MonoBehaviour
     // --------------------------------------
     // - 2D TopDown Isometric Shooter Study -
     // ----------- by Tadadosi --------------
+    // --------------------------------------
+    // ---- https://twitter.com/tadadosi ----
+    // --------------------------------------
 
     public float rate;
     public float minOffsetAngle;

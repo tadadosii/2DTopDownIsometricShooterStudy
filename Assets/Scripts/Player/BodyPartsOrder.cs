@@ -8,6 +8,9 @@ public class BodyPartsOrder : MonoBehaviour
     // --------------------------------------
     // - 2D TopDown Isometric Shooter Study -
     // ----------- by Tadadosi --------------
+    // --------------------------------------
+    // ---- https://twitter.com/tadadosi ----
+    // --------------------------------------
 
     public SpriteRenderer[] handRenderers;
     public SpriteRenderer[] headRenderers;

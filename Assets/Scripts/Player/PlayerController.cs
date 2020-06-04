@@ -37,6 +37,7 @@ public class PlayerController : AnimationManager
     public ParticleSystem[] chargeParticles;
     public SoundFXHandler chargeSFX;
 
+    private bool paused;
     private bool isRightDirection;
     private bool isCharging;
     private bool isCharged;
@@ -65,6 +66,19 @@ public class PlayerController : AnimationManager
     {
         // NOTE: to add support to a joystick right stick, store the vector direction of
         // that stick and add that to all the logic that's being handled by MouseInput
+
+        // Added here for testing and quickly pausing to create showcasing stuff
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            paused = !paused;
+            if (paused)
+                Time.timeScale = 0.0001f;
+            else
+                Time.timeScale = 1f;
+        }
+
+        if (paused)
+            return;
 
         // simple movement with Translate
         Vector3 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
