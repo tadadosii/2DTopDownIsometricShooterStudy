@@ -1240,23 +1240,14 @@ If you need any help or you found an issue that would like to talk about, reach 
 <p align="center">  
 I believe that knowledge should be free and easy to find. Not so long ago I was having a hard time figuring all this stuff out, so I started making this type of projects hoping that it will be useful to you or to anyone else who finds it.
 <p/>
-<p align="center">
-  
-**If you would like to support my work, consider doing any of the following:**
-
+<p align="center">  
+If you would like to support my work, consider doing any of the following:
 <p/>
 
-<p align="center">
-Click the image to go to itch.io and try my new game demo.
+<p align="center"> Click the image to go to itch.io and try my new game demo. 
+(if you like it, please remember to rate it, it's a big help.)
 <p/>
-
-<p align="center">
-<a href="https://twitter.com/tadadosi?ref_src=twsrc%5Etfw"><img src="https://i.imgur.com/Y9xKLSj.gif" title="Try HairLab 2D Free Demo" alt="Try HairLab 2D Free Demo">
-<p/>
-  
-<p align="center">
-(if you like it, please remember to rate it, it's a big help).
-<p/>
+<p align="center"> <a href="https://tadadosi.itch.io/hairlab2d"><img src="https://i.imgur.com/Y9xKLSj.gif" title="Try HairLab 2D Free Demo" alt="Try HairLab 2D Free Demo"> <p/>
   
 <p align="center"> 
 <a href="https://twitter.com/tadadosi?ref_src=twsrc%5Etfw"><img width="150" height="33" src="https://i.imgur.com/upEtqCa.png" title="Follow me on Twitter" alt="Follow me on Twitter @tadadosi"></a>
