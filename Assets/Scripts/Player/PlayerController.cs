@@ -1,341 +1,143 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 /// <summary>
-/// Movement, controlling weapons and body parts. This class inherits from AnimationManager
-/// to easily control the animation behaviour with its methods.
+/// This class receives inputs from TadaInput and calls methods from other classes based on those inputs. It 
+/// also handles movement.
 /// </summary>
-public class PlayerController : AnimationManager
+public class PlayerController : MonoBehaviour
 {
     // --------------------------------------
-    // - 2D TopDown Isometric Shooter Study -
+    // ----- 2D Isometric Shooter Study -----
     // ----------- by Tadadosi --------------
     // --------------------------------------
+    // ---- Support my work by following ----
     // ---- https://twitter.com/tadadosi ----
     // --------------------------------------
 
+    [TextArea(2, 10)]
+    public string notes = "It receives inputs from TadaInput and calls methods from other classes based on those inputs. It " +
+        "also handles movement.";
+
     #region ---------------------------- PROPERTIES
-    [Header("Movement")]
-    public float moveSpeed;
 
-    [Header("Body parts")]
-    // used to invert the legs based on the moving direction
-    public GameObject hips;
-
-    // arms that will be enable when looking to the left
-    public GameObject armsLeftDirection;
-
-    // arms that will be enable when looking to the right
-    public GameObject armsRightDirection;
-
-    // this properties are here to be updated from this script
-    public Shoulder leftDirectionShoulder;
-    public Shoulder rightDirectionShoulder;
-    public LookAt2Dv1[] leftDirectionLookAt;
-    public LookAt2Dv1[] rightDirectionLookAt; 
-
-    [Header("Weapon")]
-    public Weapon[] weapon;
-    public ParticleSystem[] chargeParticles;
-    public SoundFXHandler chargeSFX;
-
-    private bool paused;
-    private bool isRightDirection;
-    private bool isCharging;
-    private bool isCharged;
-    private int currentProjectile;
-    private float chargeTime;
-
-    public const float chargeDelay = 2f;
+    private PlayerPhysics _PlayerPhysics;
+    private PlayerSkills _PlayerSkills;
+    private PlayerAnimations _PlayerAnimations;
+    private WeaponHandler _WeaponHandler;
 
     #endregion
 
     #region ---------------------------- UNITY CALLBACKS
-    protected override void Awake()
+
+    // Ignore never invoked message, it's 
+    private void Awake()
     {
-        base.Awake();
-
-        // always start with right direction
-        isRightDirection = true;
-        ArmsSetActive(1);
-
-        // this can be used to dynamically change the animation speed on Update
-        SetAnimationSpeed("WalkForward", moveSpeed / 2.5f);
-        SetAnimationSpeed("WalkBackwards", moveSpeed / 2.5f);
+        Initialize();
     }
 
     private void Update()
     {
-        // NOTE: to add support to a joystick right stick, store the vector direction of
-        // that stick and add that to all the logic that's being handled by MouseInput
+        CheckIfMissingClasses();
 
-        // Added here for testing and quickly pausing to create showcasing stuff
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            paused = !paused;
-            if (paused)
-                Time.timeScale = 0.0001f;
-            else
-                Time.timeScale = 1f;
-        }
-
-        if (paused)
+        if (PauseController.isGamePaused)
             return;
 
-        // simple movement with Translate
-        Vector3 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        transform.Translate(moveInput * Time.deltaTime * moveSpeed);
+        #region ---------------------------- SKILLS
 
-        // conditions to determine if the animation should be walking forward, walking backwards or Idle
-        if ((moveInput.x > 0 || moveInput.y > 0) && MouseInput.directionFromPlayerToMouseWorldPos.x > 0)
-            PlayAnimation("WalkForward");
-        else if ((moveInput.x > 0 || moveInput.y > 0) && MouseInput.directionFromPlayerToMouseWorldPos.x < 0)
-            PlayAnimation("WalkBackwards");
-        else if ((moveInput.x < 0 || moveInput.y < 0) && MouseInput.directionFromPlayerToMouseWorldPos.x < 0)
-            PlayAnimation("WalkForward");
-        else if ((moveInput.x < 0 || moveInput.y < 0) && MouseInput.directionFromPlayerToMouseWorldPos.x > 0)
-            PlayAnimation("WalkBackwards");
-        else
-            PlayAnimation("Idle");
+        if (TadaInput.GetKeyDown(TadaInput.ThisKey.Dash) && _PlayerPhysics.Velocity.sqrMagnitude > 0)
+            _PlayerSkills.Dash();
 
-        // conditions to switch between arms and update their behaviours
-        if (MouseInput.directionFromPlayerToMouseWorldPos.x < -0.1f)
-        {
-            // Update all LookAt2Dv1 on leftDirectionLookAt array
-            // needs to be done from this script to avoid snapping movements when
-            // the arm got disabled with a rotation that's opposite to the new rotation when enabled again  
-            UpdateLookAtArray(-1);
-            if (leftDirectionShoulder != null)
-                leftDirectionShoulder.UpdateRotation();
-
-            // bool to do this action once
-            if (isRightDirection)
-            {
-                // invert the hips
-                if (hips != null)
-                    hips.transform.localScale -= Vector3.right * 2;
-
-                // actual method to switch the arms
-                ArmsSetActive(-1);
-
-                // stop this action
-                isRightDirection = false;
-            }
-        }
-        else if (MouseInput.directionFromPlayerToMouseWorldPos.x > 0.1f)
-        {
-            // Update all LookAt2Dv1 on leftDirectionLookAt array
-            // needs to be done from this script to avoid snapping movements when
-            // the arm got disabled with a rotation that's opposite to the new rotation when enabled again  
-            UpdateLookAtArray(1);
-            if (rightDirectionShoulder != null)
-                rightDirectionShoulder.UpdateRotation();
-
-            if (!isRightDirection)
-            {
-                // invert the hips
-                if (hips != null)
-                    hips.transform.localScale += Vector3.right * 2;
-
-                // actual method to switch the arms
-                ArmsSetActive(1);
-
-                // stop this action
-                isRightDirection = true;
-            }
-        }
-
-        // get mouse input while holding left click 
-        if (Input.GetMouseButton(0) && !isCharging)
-        {
-            FireWeapon();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            currentProjectile++;
-            if (currentProjectile > 1)
-                currentProjectile = 0;
-            SetWeaponProjectile(currentProjectile);
-        }
-
-        #region Charged Shot - This should go into the weapon class, but I decided to do it in here for a faster implementation
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            CameraShake.Shake(chargeDelay, 0.05f, 1f);
-            isCharging = true;
-            SetActiveChargeParticle(true);
-            if (chargeSFX != null)
-                chargeSFX.PlaySound();
-        }
-
-        if (Input.GetMouseButton(1) && isCharging && !isCharged)
-        {
-            chargeTime += Time.deltaTime;
-            SetChargePFXScale(chargeTime);
-            if (chargeTime >= chargeDelay)
-            {
-                isCharged = true;
-                isCharging = false;
-                FireWeapon(1);
-                SetChargePFXScale(1f);
-                SetActiveChargeParticle(false);
-                chargeTime = 0.0f;
-            }
-        }
-        if (Input.GetMouseButtonUp(1))
-        {
-            if (isCharged)
-            {
-                isCharged = false;
-                isCharging = false;
-            }
-            else
-            {
-                CameraShake.Shake(0f, 0f, 0f);
-                isCharging = false;
-                chargeSFX.StopSound();
-                SetChargePFXScale(1f);
-                chargeTime = 0.0f;
-            }
-            SetActiveChargeParticle(false);
-        }
         #endregion
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            SetWeaponProperties(0.125f);
+        #region ---------------------------- ANIMATIONS
 
+        // Animations: Method to determine if the animation should be walking forward, walking backwards or Idle
+        _PlayerAnimations.PlayMoveAnimationsByMoveInputAndLookDirection(TadaInput.MoveAxisRawInput);
+
+        // To dynamically change WalkForward and WalkBackwards animation speed
+        _PlayerAnimations.SetAnimationSpeed(PlayerAnimations.AnimName.WalkForward, _PlayerPhysics.Velocity.magnitude);
+        _PlayerAnimations.SetAnimationSpeed(PlayerAnimations.AnimName.WalkBackwards, _PlayerPhysics.Velocity.magnitude);
+
+        #endregion
+
+        #region ---------------------------- WEAPON ACTIONS
+
+        // Weapon: Use Primary Action while holding Left Mouse Button
+        if (TadaInput.GetKey(TadaInput.ThisKey.PrimaryAction))
+            _WeaponHandler.UseWeapon(WeaponHandler.ActionType.Primary);
+
+        // Weapon: Cancel Weapon Primary Action if Left Mouse Button is released
+        if (TadaInput.GetKeyUp(TadaInput.ThisKey.PrimaryAction))
+            _WeaponHandler.UseWeapon(WeaponHandler.ActionType.Primary, false);
+
+        // Weapon: Use Secondary Action while holding Right Mouse Button
+        if (TadaInput.GetKeyDown(TadaInput.ThisKey.SecondaryAction))
+            _WeaponHandler.UseWeapon(WeaponHandler.ActionType.Secondary);
+
+        // Weapon: Cancel Weapon Secondary Action if Right Mouse Button is released
+        if (TadaInput.GetKeyUp(TadaInput.ThisKey.SecondaryAction))
+            _WeaponHandler.UseWeapon(WeaponHandler.ActionType.Secondary, false);
+
+        #endregion
+
+        #region ---------------------------- WEAPON USE RATE
+
+        // Weapon: Switch to Next Use Rate
+        if (TadaInput.GetKeyDown(TadaInput.ThisKey.NextUseRate))
+            _WeaponHandler.SwitchUseRate(Weapon.SwitchUseRateType.Next);
+
+        // Weapon: Switch to Previous Use Rate
+        if (TadaInput.GetKeyDown(TadaInput.ThisKey.PreviousUseRate))
+            _WeaponHandler.SwitchUseRate(Weapon.SwitchUseRateType.Previous);
+
+        #endregion
+
+        #region ---------------------------- WEAPON SWITCH
+
+        // Weapon: Switch weapon to index 0
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            _WeaponHandler.SwitchWeapon(WeaponHandler.WeaponSwitchMode.ByIndex, 0);
+
+        // Weapon: Switch weapon to index 1
         if (Input.GetKeyDown(KeyCode.Alpha2))
-            SetWeaponProperties(0.05f);
+            _WeaponHandler.SwitchWeapon(WeaponHandler.WeaponSwitchMode.ByIndex, 1);
+
+        // Weapon: Switch to next weapon
+        if (TadaInput.GetKeyDown(TadaInput.ThisKey.NextWeapon))
+            _WeaponHandler.SwitchWeapon(WeaponHandler.WeaponSwitchMode.Next);
+
+        // Weapon: Switch to previous weapon
+        if (TadaInput.GetKeyDown(TadaInput.ThisKey.PreviousWeapon))
+            _WeaponHandler.SwitchWeapon(WeaponHandler.WeaponSwitchMode.Previous);
+
+        #endregion
     }
 
     #endregion
 
     #region ---------------------------- METHODS
-    /// <param name="direction"> -1 left | 1 right </param>
-    private void UpdateLookAtArray(int direction)
+
+    /// <summary>
+    /// All the actions that should be done on <see cref="Awake"/>
+    /// </summary>
+    private void Initialize()
     {
-        if (leftDirectionLookAt.Length == 0 || rightDirectionLookAt.Length == 0)
+        TryGetComponent(out _PlayerAnimations);
+        TryGetComponent(out _WeaponHandler);
+        TryGetComponent(out _PlayerPhysics);
+        TryGetComponent(out _PlayerSkills);
+    }
+
+    /// <summary>
+    /// To display a warning message in the console if there is something missing 
+    /// that should be added in the Inspector.
+    /// </summary>
+    private void CheckIfMissingClasses()
+    {
+        if (_PlayerAnimations == null || _WeaponHandler == null || _PlayerPhysics == null || _PlayerSkills == null)
+        {
+            Debug.LogWarning(gameObject.name + ": Missing behaviour classes!");
             return;
-
-        // simple switch to choose between -1 for left direction and +1 for right direction
-        switch (direction)
-        {
-            case -1:
-                for (int i = 0; i < leftDirectionLookAt.Length; i++)
-                {
-                    if (leftDirectionLookAt[i] != null)
-                        leftDirectionLookAt[i].UpdateLookAt();
-                }
-                break;
-
-            case 1:
-                for (int i = 0; i < rightDirectionLookAt.Length; i++)
-                {
-                    if (rightDirectionLookAt[i] != null)
-                        rightDirectionLookAt[i].UpdateLookAt();
-                }
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    /// <param name="direction"> -1 left | 1 right </param>
-    private void ArmsSetActive(int direction)
-    {
-        if (armsLeftDirection == null && armsRightDirection == null)
-            return;
-
-        // simple switch to choose between -1 for left direction and +1 for right direction
-        switch (direction)
-        {
-            case -1:
-                for (int i = 0; i < leftDirectionLookAt.Length; i++)
-                {
-                    armsLeftDirection.SetActive(true);
-                    armsRightDirection.SetActive(false);
-                }
-                break;
-
-            case 1:
-                for (int i = 0; i < rightDirectionLookAt.Length; i++)
-                {
-                    armsLeftDirection.SetActive(false);
-                    armsRightDirection.SetActive(true);
-                }
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    /// <param name="type">0 Basic | 1 Charged </param>
-    private void FireWeapon(int type = 0)
-    {
-        for (int i = 0; i < weapon.Length; i++)
-        {
-            // if there is a weapon and that weapon is enabled
-            if (weapon[i] != null && weapon[i].gameObject.activeInHierarchy)
-            {
-                //Debug.Log("PlayerController: Calling Weapon FireProjectile()");
-                if (type == 0)
-                    weapon[i].FireBasic();
-                else
-                    weapon[i].FireCharged();
-            }
-        }
-    }
-
-    private void SetWeaponProperties(float value)
-    {
-        for (int i = 0; i < weapon.Length; i++)
-        {
-            if (weapon[i] != null)
-            {
-                weapon[i].fireRate = value;
-            }
-        }
-    }
-
-    private void SetWeaponProjectile(int projectileIndex)
-    {
-        for (int i = 0; i < weapon.Length; i++)
-        {
-            if (weapon[i] != null)
-            {
-                weapon[i].ProjectileIndex = projectileIndex;
-            }
-        }
-    }
-
-    private void SetChargePFXScale(float multiplier)
-    {
-        if (chargeParticles.Length == 0)
-            return;
-
-        for (int i = 0; i < chargeParticles.Length; i++)
-        {
-            if (chargeParticles[i] != null)
-            {
-                chargeParticles[i].transform.localScale = Vector2.one * multiplier;
-            }
-        }
-    }
-
-    /// <param name="state">0 Stop | 1 Play</param>
-    private void SetActiveChargeParticle(bool value)
-    {
-        if (chargeParticles.Length == 0)
-            return;
-
-        for (int i = 0; i < chargeParticles.Length; i++)
-        {
-            if (chargeParticles[i] != null)
-            {
-                chargeParticles[i].gameObject.SetActive(value);
-            }
         }
     }
 

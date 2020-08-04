@@ -1,19 +1,25 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// To quickly add to a gameobject and simply set it to play a clip on awake
+/// This class currently has a method that plays a single audio clip by calling the SoundManager music methods. The volume can be manually
+/// set on the Inspector and it also has a bool called playOnAwake that can be checked to play the audio clip when the Start() method happens.
 /// </summary>
 public class MusicHandler : MonoBehaviour
-{    // --------------------------------------
+{
+    // --------------------------------------
     // - 2D TopDown Isometric Shooter Study -
     // ----------- by Tadadosi --------------
     // --------------------------------------
     // ---- https://twitter.com/tadadosi ----
     // --------------------------------------
 
-    public float volume;
+    [TextArea(4, 10)]
+    public string notes = "This class currently has a method that plays a single audio clip by calling the SoundManager music methods. The volume can be manually " +
+        "set on the Inspector and it also has a bool called playOnAwake that can be checked to play the audio clip when the Start() method happens.";
+
+    [SerializeField] private float volume = 0.65f;
     public AudioClip[] musicClips;
-    public bool playOnAwake;
+    [SerializeField] private bool playOnAwake = true;
 
     private void Start()
     {
@@ -27,7 +33,7 @@ public class MusicHandler : MonoBehaviour
         {
             if (index <= musicClips.Length - 1 && musicClips[index] != null)
             {
-                SoundManager.Instance.SetMusicVolume(volume);
+                SoundManager.Instance.Music_SetVolume(volume);
                 SoundManager.Instance.Music_Play(musicClips[index]);
             }
         }

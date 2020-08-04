@@ -1,52 +1,54 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Spawn projectiles, Fire Basic Projectiles, Fire Charged Projectiles and a timer to stop the player from shooting like crazy (fireRate)
+/// Base class that has public methods for actions and a SwitchUseRate method to switch between a given 
+/// float called UseRate which is used to control how often the actions can be called.
 /// </summary>
+
 public class Weapon : MonoBehaviour
 {
     // --------------------------------------
-    // - 2D TopDown Isometric Shooter Study -
+    // ----- 2D Isometric Shooter Study -----
     // ----------- by Tadadosi --------------
     // --------------------------------------
+    // ---- Support my work by following ----
     // ---- https://twitter.com/tadadosi ----
     // --------------------------------------
 
     #region ---------------------------- PROPERTIES
-    public float fireRate;
-    public float chargeDuration;
-    public GameObject[] projectilePrefabs;
-    public Transform projectileSpawnPoint;
 
-    public int ProjectileIndex { get { return _ProjectileIndex; } set { _ProjectileIndex = value; } }
-    private int _ProjectileIndex;
+    /// <summary>
+    /// Option for how to switch use rates using SwitchUseRate.
+    /// </summary>
+    public enum SwitchUseRateType { Next, Previous, ByIndex }
 
-    protected Projectile basicProjectile;
-    protected Projectile chargedProjectile;
-    protected bool canFire;
+    [SerializeField] private bool debug = false;
+
+    public float UseRate { get { return _UseRate; } private set { _UseRate = value; } }
+    [SerializeField] protected float _UseRate;
+
+    protected bool canUse;
+    protected float[] useRateValues;
+    protected int useRateIndex;
     protected float t;
+
     #endregion
 
     #region ---------------------------- UNITY CALLBACKS
-    protected virtual void Awake() 
+    protected virtual void Awake()
     {
-        canFire = true;
-    }
-
-    protected virtual void OnEnable()
-    {
-        SpawnProjectile();
+        canUse = true;
     }
 
     protected virtual void Update()
     {
-        if (!canFire)
+        if (!canUse)
         {
             t += Time.deltaTime;
-            if (t >= fireRate)
+            if (t >= _UseRate)
             {
-                canFire = true;
-                SpawnProjectile();
+                canUse = true;
+                OnCanUse();
                 t = 0.0f;
             }
         }
@@ -54,47 +56,57 @@ public class Weapon : MonoBehaviour
     #endregion
 
     #region ---------------------------- METHODS
-    protected virtual void SpawnProjectile()
+
+    public virtual void SwitchUseRate(SwitchUseRateType type, int index = 0)
     {
-        if (projectilePrefabs == null || projectileSpawnPoint == null)
+        if (useRateValues.Length == 0)
         {
-            Debug.LogError(gameObject.name + " missing prefab or spawnPoint!");
+            Debug.LogWarning(gameObject.name + ": Need to add at least one UseRate value!");
             return;
         }
-        if (basicProjectile == null && projectilePrefabs[_ProjectileIndex] != null)
+
+        switch (type)
         {
-            basicProjectile = Instantiate(projectilePrefabs[_ProjectileIndex], projectileSpawnPoint.position,
-            projectileSpawnPoint.rotation, projectileSpawnPoint).GetComponent<Projectile>();
-            basicProjectile.SetActive(false);
+            case SwitchUseRateType.Next:
+                useRateIndex = ArraysHandler.GetNextIndex(useRateIndex, useRateValues.Length);
+                break;
+
+            case SwitchUseRateType.Previous:
+                useRateIndex = ArraysHandler.GetPreviousIndex(useRateIndex, useRateValues.Length);
+                break;
+
+            case SwitchUseRateType.ByIndex:
+                if (index >= 0 && index <= useRateValues.Length - 1)
+                    useRateIndex = index;
+                break;
+
+            default:
+                break;
         }
+
+        _UseRate = useRateValues[useRateIndex];
+
+        if (debug)
+            Debug.Log(gameObject.name + " Weapon UseRate # " + useRateIndex + ": " + _UseRate);
     }
 
-    public virtual void FireBasic()
+    protected virtual void OnCanUse()
     {
-        if (basicProjectile != null && canFire)
-        {
-            basicProjectile.SetActive(true);
-            CameraShake.Shake(0.075f, 0.085f, 3f);
-            //Debug.Log("Weapon: Calling Projectile Fire()");
-            basicProjectile.Fire();
-            basicProjectile = null;
-            canFire = false;
-        }
+        if (debug)
+            Debug.Log(gameObject.name + "Weapon: OnCanUse");
     }
 
-    public virtual void FireCharged()
+    public virtual void PrimaryAction(bool value)
     {
-        if (basicProjectile != null && canFire)
-        {
-            if (chargedProjectile == null && 2 <= projectilePrefabs.Length && projectilePrefabs[2] != null)
-            {
-                chargedProjectile = Instantiate(projectilePrefabs[2], projectileSpawnPoint.position,
-                projectileSpawnPoint.rotation, projectileSpawnPoint).GetComponent<Projectile>();
-                chargedProjectile.Fire();
-            }
-            CameraShake.Shake(0.2f, 0.5f, 3f);
-            chargedProjectile = null;
-        }
+        if (debug)
+            Debug.Log(gameObject.name + "Weapon: PrimaryAction | " + value);
     }
+
+    public virtual void SecondaryAction(bool value)
+    {
+        if (debug)
+            Debug.Log(gameObject.name + "Weapon: SecondaryAction | " + value);
+    }
+
     #endregion
 }

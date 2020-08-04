@@ -2,47 +2,77 @@
 using UnityEngine;
 
 /// <summary>
-/// To easily access to a bunch of useful Audio actions and simply have 2 audiosources on the scene
-/// one for the music and the other one for the sound fxs
+/// This class inherits from the Singleton base class, thus making it a globally accesible instante. It's purpose is to grant easy access to 
+/// a bunch of useful Audio actions and simply having 2 audiosources on the scene, one for the music and the other one for the sound fxs.
 /// </summary>
 public class SoundManager : Singleton<SoundManager>
 {
     // --------------------------------------
-    // - 2D TopDown Isometric Shooter Study -
+    // ----- 2D Isometric Shooter Study -----
     // ----------- by Tadadosi --------------
     // --------------------------------------
+    // ---- Support my work by following ----
     // ---- https://twitter.com/tadadosi ----
     // --------------------------------------
 
+    [TextArea(4, 10)]
+    public string notes = "This class inherits from the Singleton base class, thus making it a globally accesible instante. " +
+        "It's purpose is to grant easy access to a bunch of useful Audio actions and simply having 2 audiosources on the scene, " +
+        "one for the music and the other one for the sound fxs.";
+
     #region ---------------------------- PROPERTIES & UNITY CALLBACKS
-    private AudioSource sfx;
-    private AudioSource music;
-    private void Awake()
+
+    public enum SFX_Type { Default, Unstoppable }
+
+    protected SoundManager() { }
+    private SoundEmitter sfx;
+    private SoundEmitter unstoppableSfx;
+    private SoundEmitter music;
+    protected override void Awake()
     {
-        if (transform.Find("SoundFXs") == null)
+        base.Awake();
+
+        // if there are no SoundEmitters, create them.
+
+        if (!FindObjectOfType<SoundFXEmitter>())
         {
-            sfx = new GameObject("SoundFXs").AddComponent<AudioSource>();
+            sfx = new GameObject("SoundFXs").AddComponent<SoundEmitter>();
             sfx.transform.SetParent(transform);
         }
-        if (transform.Find("Music") == null)
+
+        if (!FindObjectOfType<UnstoppableSoundEmitter>())
         {
-            music = new GameObject("Music").AddComponent<AudioSource>();
-            music.loop = true;
+            unstoppableSfx = new GameObject("UnstoppableSoundFXs").AddComponent<UnstoppableSoundEmitter>();
+            unstoppableSfx.transform.SetParent(transform);
+        }
+
+        if (!FindObjectOfType<MusicEmitter>())
+        {
+            music = new GameObject("Music").AddComponent<MusicEmitter>();
             music.transform.SetParent(transform);
         }
     }
     #endregion
 
     #region ---------------------------- SFX
-    public void SFX_PlayOneShot(AudioClip clip, float volume, float minPitch = 1f, float maxPitch = 1f)
+
+    public void SFX_PlayOneShot(AudioClip clip, float volume, float minPitch = 1f, float maxPitch = 1f, bool unstoppable = false)
     {
+        AudioSource src = sfx.Source;
+
+        if (unstoppable)
+            src = unstoppableSfx.Source;
+
         if (clip != null && music != null)
         {
-            sfx.pitch = Random.Range(minPitch, maxPitch);
-            sfx.PlayOneShot(clip, volume);
+            src.pitch = Random.Range(minPitch, maxPitch);
+            src.PlayOneShot(clip, volume);
         }
     }
 
+    /// <summary>
+    /// Starts a coroutine that uses WaitForSeconds(delay) to play a clip after the seconds have passed.
+    /// </summary>
     public void SFX_PlayDelayedOneShot(AudioClip clip, float volume, float minPitch = 1f, float maxPitch = 1f, float delay = 1f)
     {
         StartCoroutine(CO_SFX_PlayDelayedOneShot(clip, volume, minPitch, maxPitch, delay));
@@ -53,21 +83,21 @@ public class SoundManager : Singleton<SoundManager>
         yield return new WaitForSeconds(delay);
         if (clip != null && music != null)
         {
-            sfx.pitch = Random.Range(minPitch, maxPitch);
-            sfx.PlayOneShot(clip, volume);
+            sfx.Source.pitch = Random.Range(minPitch, maxPitch);
+            sfx.Source.PlayOneShot(clip, volume);
         }
     }
 
-    public void SetSFXVolume(float value)
+    public void SFX_SetVolume(float value)
     {
         if (sfx != null)
-            sfx.volume = value;
+            sfx.Source.volume = value;
     }
 
-    public void StopSFX()
+    public void SFX_Stop()
     {
         if (sfx != null)
-            sfx.Stop();
+            sfx.Source.Stop();
     }
     #endregion
 
@@ -75,22 +105,22 @@ public class SoundManager : Singleton<SoundManager>
     public void Music_PlayOneShot(AudioClip clip, float volume)
     {
         if (clip != null && music != null)
-            music.PlayOneShot(clip, volume);
+            music.Source.PlayOneShot(clip, volume);
     }
 
     public void Music_Play(AudioClip clip)
     {
         if (clip != null && music != null)
         {
-            music.clip = clip;
-            music.Play();
+            music.Source.clip = clip;
+            music.Source.Play();
         }
     }
 
-    public void SetMusicVolume(float value)
+    public void Music_SetVolume(float value)
     {
         if (music != null)
-            music.volume = value;
+            music.Source.volume = value;
     }
     #endregion
 }
